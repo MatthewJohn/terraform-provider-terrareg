@@ -96,7 +96,15 @@ func (r *NamespaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	// r.client.GetNamespace(data.Name)
+	_, err := r.client.GetNamespace(data.Name.ValueString())
+	// If namespace was not found, set Name to empty value
+	if err == terrareg.ErrNotFound {
+		data.Name = types.StringValue("")
+	}
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read namespace, got error: %s", err))
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

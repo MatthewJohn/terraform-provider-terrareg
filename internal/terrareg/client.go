@@ -13,6 +13,12 @@ type TerraregClient struct {
 	ApiKey string
 }
 
+type NamespaceModel struct {
+	DisplayName    string `json:"display_name"`
+	IsAutoVerified bool   `json:"is_auto_verified"`
+	Trusted        bool   `json:"trusted"`
+}
+
 var ErrNotFound = errors.New("Not found")
 var ErrInvalidAuth = errors.New("Invalid Authentication")
 var ErrUnauthorized = errors.New("Unauthorized")
@@ -45,13 +51,18 @@ func (c *TerraregClient) getTerraregApiUrl(apiEndpoint string) string {
 	return fmt.Sprintf("%s/v1/terrareg/%s", c.Url, apiEndpoint)
 }
 
-func (c *TerraregClient) makePostRequest(url string, jsonData any) (*http.Response, error) {
-	jsonStr, err := json.Marshal(jsonData)
-	if err != nil {
-		return nil, err
+func (c *TerraregClient) makeRequest(url string, requestMethod string, jsonData any) (*http.Response, error) {
+	jsonStr := ""
+	if jsonData != nil {
+		var err error = nil
+		jsonBytes, err := json.Marshal(jsonData)
+		if err != nil {
+			return nil, err
+		}
+		jsonStr = string(jsonBytes)
 	}
 
-	req, err := http.NewRequest("POST", url, strings.NewReader(string(jsonStr)))
+	req, err := http.NewRequest(requestMethod, url, strings.NewReader(jsonStr))
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +85,7 @@ func (c *TerraregClient) CreateNamespace(name string) error {
 	postData := map[string]string{
 		"name": name,
 	}
-	res, err := c.makePostRequest(url, postData)
+	res, err := c.makeRequest(url, "POST", postData)
 	if err != nil {
 		return err
 	}
@@ -92,4 +103,42 @@ func (c *TerraregClient) CreateNamespace(name string) error {
 		return ErrUnknownServerError
 	}
 	return ErrUnknownError
+}
+
+func (c *TerraregClient) GetNamespace(name string) (*NamespaceModel, error) {
+	url := c.getTerraregApiUrl(fmt.Sprintf("namespaces/%s", name))
+
+	res, err := c.makeRequest(url, "GET", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode == 401 {
+		return nil, ErrInvalidAuth
+	}
+	if res.StatusCode == 403 {
+		return nil, ErrUnauthorized
+	}
+	if res.StatusCode >= 500 && res.StatusCode <= 503 {
+		return nil, ErrUnknownServerError
+	}
+	if res.StatusCode != 200 {
+		return nil, ErrUnknownError
+	}
+
+	// Body is 200
+	if res.Body == nil {
+		return nil, ErrUnknownError
+	}
+
+	dec := json.NewDecoder(res.Body)
+	dec.DisallowUnknownFields()
+
+	var namespace NamespaceModel
+	err = dec.Decode(&namespace)
+	if err != nil {
+		fmt.Printf("Terrareg Client: Unable to decode namespace JSON from response body")
+		return nil, err
+	}
+	return &namespace, nil
 }
