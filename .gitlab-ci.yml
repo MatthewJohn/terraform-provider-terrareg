@@ -24,7 +24,7 @@ test:
   variables:
     TF_ACC: "1"
     TERRAREG_URL: "http://terrareg:5000"
-    TERRAREG_API_KEY: ${ADMIN_AUTHENTICATION_TOKEN}
+    TERRAREG_API_KEY: unittest-api-key
   script:
     - go test -race $(go list ./... | grep -v /vendor/)
 
