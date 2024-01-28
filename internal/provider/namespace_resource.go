@@ -41,7 +41,7 @@ func (r *NamespaceResource) Schema(ctx context.Context, req resource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Namespace name",
-				Optional:            false,
+				Required:            true,
 			},
 		},
 	}

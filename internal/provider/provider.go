@@ -38,7 +38,7 @@ func (p *TerraregProvider) Schema(ctx context.Context, req provider.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
 				MarkdownDescription: "Terrareg url (e.g. https://terrareg.example.com)",
-				Optional:            false,
+				Required:            true,
 			},
 			"api_key": schema.StringAttribute{
 				MarkdownDescription: "API Key for authenticating to Terrareg (currently supports admin auth token)",
