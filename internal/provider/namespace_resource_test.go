@@ -45,12 +45,10 @@ func TestAccNamespaceResource(t *testing.T) {
 }
 
 func testAccNamespaceResourceConfig(name string, displayName string) string {
-	return fmt.Sprintf(`
-%[1]s
-
+	return buildTestProviderConfig(fmt.Sprintf(`
 resource "terrareg_namespace" "test" {
-  name         = %[2]q
-  display_name = %[3]q
+  name         = %[1]q
+  display_name = %[2]q
 }
-`, providerConfig, name, displayName)
+`, name, displayName))
 }
