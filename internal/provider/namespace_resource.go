@@ -26,6 +26,7 @@ type NamespaceResource struct {
 
 // NamespaceResourceModel describes the resource data model.
 type NamespaceResourceModel struct {
+	ID          types.String `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
 	DisplayName types.String `tfsdk:"display_name"`
 }
@@ -39,6 +40,10 @@ func (r *NamespaceResource) Schema(ctx context.Context, req resource.SchemaReque
 		MarkdownDescription: "Namespace resource",
 
 		Attributes: map[string]schema.Attribute{
+			// ID attribute required for unit testing
+			"id": schema.StringAttribute{
+				Computed: true,
+			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Namespace name",
 				Required:            true,
@@ -89,6 +94,9 @@ func (r *NamespaceResource) Create(ctx context.Context, req resource.CreateReque
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create namespace, got error: %s", err))
 		return
 	}
+
+	// Set ID attribute
+	data.ID = data.Name
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -144,6 +152,9 @@ func (r *NamespaceResource) Update(ctx context.Context, req resource.UpdateReque
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update namespace, got error: %s", err))
 		return
 	}
+
+	// Update ID attribute
+	data.ID = data.Name
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
