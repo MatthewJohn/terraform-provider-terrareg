@@ -78,7 +78,7 @@ func (r *NamespaceResource) Create(ctx context.Context, req resource.CreateReque
 
 	err := r.client.CreateNamespace(data.Name.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create example, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create namespace, got error: %s", err))
 		return
 	}
 
