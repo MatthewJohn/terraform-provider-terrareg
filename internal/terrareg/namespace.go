@@ -12,17 +12,15 @@ type NamespaceModel struct {
 }
 
 type NamespaceConfigModel struct {
-	Name string `json:"name"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
 }
 
-func (c *TerraregClient) CreateNamespace(name string) error {
+func (c *TerraregClient) CreateNamespace(config NamespaceConfigModel) error {
 
 	url := c.getTerraregApiUrl("namespaces")
 
-	postData := map[string]string{
-		"name": name,
-	}
-	res, err := c.makeRequest(url, "POST", postData)
+	res, err := c.makeRequest(url, "POST", config)
 	if err != nil {
 		return err
 	}
@@ -70,10 +68,10 @@ func (c *TerraregClient) GetNamespace(name string) (*NamespaceModel, error) {
 	return &namespace, nil
 }
 
-func (c *TerraregClient) UpdateNamespace(name string, newName string) error {
+func (c *TerraregClient) UpdateNamespace(name string, config NamespaceConfigModel) error {
 	url := c.getTerraregApiUrl(fmt.Sprintf("namespaces/%s", name))
 
-	res, err := c.makeRequest(url, "POST", NamespaceConfigModel{Name: newName})
+	res, err := c.makeRequest(url, "POST", config)
 	if err != nil {
 		return err
 	}

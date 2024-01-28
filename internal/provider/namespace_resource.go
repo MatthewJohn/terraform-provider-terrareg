@@ -26,7 +26,8 @@ type NamespaceResource struct {
 
 // NamespaceResourceModel describes the resource data model.
 type NamespaceResourceModel struct {
-	Name types.String `tfsdk:"name"`
+	Name        types.String `tfsdk:"name"`
+	DisplayName types.String `tfsdk:"display_name"`
 }
 
 func (r *NamespaceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -41,6 +42,10 @@ func (r *NamespaceResource) Schema(ctx context.Context, req resource.SchemaReque
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Namespace name",
 				Required:            true,
+			},
+			"display_name": schema.StringAttribute{
+				MarkdownDescription: "User-friendly Namespace display name",
+				Optional:            true,
 			},
 		},
 	}
@@ -76,7 +81,10 @@ func (r *NamespaceResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	err := r.client.CreateNamespace(data.Name.ValueString())
+	err := r.client.CreateNamespace(terrareg.NamespaceConfigModel{
+		Name:        data.Name.ValueString(),
+		DisplayName: data.DisplayName.ValueString(),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create namespace, got error: %s", err))
 		return
@@ -125,7 +133,13 @@ func (r *NamespaceResource) Update(ctx context.Context, req resource.UpdateReque
 	diags := req.State.GetAttribute(ctx, path.Root("name"), &name)
 	resp.Diagnostics.Append(diags...)
 
-	err := r.client.UpdateNamespace(name.ValueString(), data.Name.ValueString())
+	err := r.client.UpdateNamespace(
+		name.ValueString(),
+		terrareg.NamespaceConfigModel{
+			Name:        data.Name.ValueString(),
+			DisplayName: data.DisplayName.ValueString(),
+		},
+	)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update namespace, got error: %s", err))
 		return
