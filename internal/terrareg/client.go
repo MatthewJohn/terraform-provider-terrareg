@@ -64,8 +64,9 @@ func (c *TerraregClient) CreateNamespace(name string) (*http.Response, error) {
 
 	url := c.getTerraregApiUrl("namespaces")
 
-	var postData map[string]string
-	postData["name"] = name
+	postData := map[string]string{
+		"name": name,
+	}
 	res, err := c.makePostRequest(url, postData)
 	if err != nil {
 		return nil, err
