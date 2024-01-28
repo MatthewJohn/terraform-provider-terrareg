@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/matthewjohn/terraform-provider-terrareg/internal/terrareg"
 )
 
@@ -77,23 +76,11 @@ func (r *NamespaceResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	res, err := r.client.CreateNamespace(data.Name.ValueString())
+	err := r.client.CreateNamespace(data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create example, got error: %s", err))
 		return
 	}
-	if res.StatusCode != 200 {
-		var body []byte
-		res.Body.Read(body)
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create example, got HTTP response: %d: %s", res.StatusCode, string(body)))
-		return
-	}
-
-	// Write logs using the tflog package
-	// Documentation: https://terraform.io/plugin/log
-	tflog.Trace(ctx, "created namespace")
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

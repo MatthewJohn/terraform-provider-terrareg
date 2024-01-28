@@ -2,6 +2,7 @@ package terrareg
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,6 +12,12 @@ type TerraregClient struct {
 	Url    string
 	ApiKey string
 }
+
+var ErrNotFound = errors.New("Not found")
+var ErrInvalidAuth = errors.New("Invalid Authentication")
+var ErrUnauthorized = errors.New("Unauthorized")
+var ErrUnknownServerError = errors.New("Unknown Server error")
+var ErrUnknownError = errors.New("Unknown Error")
 
 func NewClient(url string, apiKey string) (*TerraregClient, error) {
 	return &TerraregClient{
@@ -60,7 +67,7 @@ func (c *TerraregClient) makePostRequest(url string, jsonData any) (*http.Respon
 	return httpRes, nil
 }
 
-func (c *TerraregClient) CreateNamespace(name string) (*http.Response, error) {
+func (c *TerraregClient) CreateNamespace(name string) error {
 
 	url := c.getTerraregApiUrl("namespaces")
 
@@ -69,8 +76,20 @@ func (c *TerraregClient) CreateNamespace(name string) (*http.Response, error) {
 	}
 	res, err := c.makePostRequest(url, postData)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return res, nil
+	if res.StatusCode == 200 {
+		return nil
+	}
+	if res.StatusCode == 401 {
+		return ErrInvalidAuth
+	}
+	if res.StatusCode == 403 {
+		return ErrUnauthorized
+	}
+	if res.StatusCode >= 500 && res.StatusCode <= 503 {
+		return ErrUnknownServerError
+	}
+	return ErrUnknownError
 }
