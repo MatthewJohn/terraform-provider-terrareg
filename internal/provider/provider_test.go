@@ -33,7 +33,7 @@ func getEnv(key, defaultVal string) string {
 
 func buildTestProviderConfig(main string) string {
 	return fmt.Sprintf(`
-provider "terrareg"
+provider "terrareg" {
   url = %[1]q
   api_key = %[2]q
 }
