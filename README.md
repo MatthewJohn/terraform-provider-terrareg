@@ -33,7 +33,7 @@ go test $(go list ./...) -count=1 -v
 
 To run acceptance tests, run an instance of terrareg (https://github.com/matthewjohn/terrareg) and run acceptance tests:
 ```
-docker run -d -p 5000:5000 -e MIGRATE_DATABASE=True -e ADMIN_AUTHENTICATION_TOKEN=password
+docker run -d -p 5000:5000 -e MIGRATE_DATABASE=true -e ADMIN_AUTHENTICATION_TOKEN=password
 
 TF_ACC=1 TERRAREG_URL=http://localhost:5000 TERRAREG_API_KEY=password go test $(go list ./...) -count=1 -v
 ```
