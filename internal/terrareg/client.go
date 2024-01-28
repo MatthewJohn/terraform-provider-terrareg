@@ -145,3 +145,22 @@ func (c *TerraregClient) GetNamespace(name string) (*NamespaceModel, error) {
 	}
 	return &namespace, nil
 }
+
+func (c *TerraregClient) DeleteNamespace(name string) error {
+	url := c.getTerraregApiUrl(fmt.Sprintf("namespaces/%s", name))
+
+	res, err := c.makeRequest(url, "DELETE", nil)
+	if err != nil {
+		return err
+	}
+
+	err = c.handleCommonStatusCode(res.StatusCode)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return ErrUnknownError
+	}
+
+	return nil
+}
