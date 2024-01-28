@@ -23,7 +23,7 @@ var ErrNotFound = errors.New("Not found")
 var ErrInvalidAuth = errors.New("Invalid Authentication")
 var ErrUnauthorized = errors.New("Unauthorized")
 var ErrUnknownServerError = errors.New("Unknown Server error")
-var ErrUnknownError = errors.New("Unknown Error")
+var ErrUnknownError = errors.New("Unknown HTTP Response")
 
 func NewClient(url string, apiKey string) (*TerraregClient, error) {
 	return &TerraregClient{
