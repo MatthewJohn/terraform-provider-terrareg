@@ -78,6 +78,19 @@ func (c *TerraregClient) makeRequest(url string, requestMethod string, jsonData 
 	return httpRes, nil
 }
 
+func (c *TerraregClient) handleCommonStatusCode(statusCode int) error {
+	if statusCode == 401 {
+		return ErrInvalidAuth
+	}
+	if statusCode == 403 {
+		return ErrUnauthorized
+	}
+	if statusCode >= 500 && statusCode <= 503 {
+		return ErrUnknownServerError
+	}
+	return nil
+}
+
 func (c *TerraregClient) CreateNamespace(name string) error {
 
 	url := c.getTerraregApiUrl("namespaces")
@@ -90,19 +103,14 @@ func (c *TerraregClient) CreateNamespace(name string) error {
 		return err
 	}
 
-	if res.StatusCode == 200 {
-		return nil
+	err = c.handleCommonStatusCode(res.StatusCode)
+	if err != nil {
+		return err
 	}
-	if res.StatusCode == 401 {
-		return ErrInvalidAuth
+	if res.StatusCode != 200 {
+		return ErrUnknownError
 	}
-	if res.StatusCode == 403 {
-		return ErrUnauthorized
-	}
-	if res.StatusCode >= 500 && res.StatusCode <= 503 {
-		return ErrUnknownServerError
-	}
-	return ErrUnknownError
+	return nil
 }
 
 func (c *TerraregClient) GetNamespace(name string) (*NamespaceModel, error) {
@@ -113,14 +121,9 @@ func (c *TerraregClient) GetNamespace(name string) (*NamespaceModel, error) {
 		return nil, err
 	}
 
-	if res.StatusCode == 401 {
-		return nil, ErrInvalidAuth
-	}
-	if res.StatusCode == 403 {
-		return nil, ErrUnauthorized
-	}
-	if res.StatusCode >= 500 && res.StatusCode <= 503 {
-		return nil, ErrUnknownServerError
+	err = c.handleCommonStatusCode(res.StatusCode)
+	if err != nil {
+		return nil, err
 	}
 	if res.StatusCode != 200 {
 		return nil, ErrUnknownError
