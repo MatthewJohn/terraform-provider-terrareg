@@ -71,6 +71,7 @@ jobs:
           - 5000:5000
         env:
           ADMIN_AUTHENTICATION_TOKEN: unittest-api-key
+          MIGRATE_DATABASE: True
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
       - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
