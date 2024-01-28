@@ -112,7 +112,7 @@ func (r *NamespaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	_, err := r.client.GetNamespace(data.Name.ValueString())
+	namespace, err := r.client.GetNamespace(data.Name.ValueString())
 	// If namespace was not found, set Name to empty value
 	if err == terrareg.ErrNotFound {
 		data.Name = types.StringValue("")
@@ -122,8 +122,9 @@ func (r *NamespaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	// Update ID attribute
+	// Update attributes
 	data.ID = data.Name
+	data.DisplayName = types.StringValue(namespace.DisplayName)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
