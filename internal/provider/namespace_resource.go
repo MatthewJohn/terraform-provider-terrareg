@@ -80,8 +80,14 @@ func (r *NamespaceResource) Create(ctx context.Context, req resource.CreateReque
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
 	res, err := r.client.CreateNamespace(data.Name.String())
-	if err != nil || res.StatusCode != 200 {
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create example, got error: %s", err))
+		return
+	}
+	if res.StatusCode != 200 {
+		var body []byte
+		res.Body.Read(body)
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create example, got HTTP response: %d: %s", res.StatusCode, string(body)))
 		return
 	}
 
