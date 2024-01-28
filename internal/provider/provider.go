@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -23,9 +22,8 @@ type TerraregProvider struct {
 
 // TerraregProviderModel describes the provider data model.
 type TerraregProviderModel struct {
-	Url     types.String `tfsdk:"url"`
-	ApiKey  types.String `tfsdk:"api_key"`
-	Headers http.Header
+	Url    types.String `tfsdk:"url"`
+	ApiKey types.String `tfsdk:"api_key"`
 }
 
 func (p *TerraregProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
