@@ -84,7 +84,6 @@ func (p *TerraregProvider) Configure(ctx context.Context, req provider.Configure
 
 	tflog.Debug(ctx, "Creating Terrareg client")
 
-	// client := http.DefaultClient
 	api, err := terrareg.NewClient(url, data.ApiKey.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
