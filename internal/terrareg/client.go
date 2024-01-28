@@ -19,6 +19,10 @@ type NamespaceModel struct {
 	Trusted        bool   `json:"trusted"`
 }
 
+type NamespaceConfigModel struct {
+	Name string `json:"name"`
+}
+
 var ErrNotFound = errors.New("Not found")
 var ErrInvalidAuth = errors.New("Invalid Authentication")
 var ErrUnauthorized = errors.New("Unauthorized")
@@ -144,6 +148,25 @@ func (c *TerraregClient) GetNamespace(name string) (*NamespaceModel, error) {
 		return nil, err
 	}
 	return &namespace, nil
+}
+
+func (c *TerraregClient) UpdateNamespace(name string, newName string) error {
+	url := c.getTerraregApiUrl(fmt.Sprintf("namespaces/%s", name))
+
+	res, err := c.makeRequest(url, "POST", NamespaceConfigModel{Name: newName})
+	if err != nil {
+		return err
+	}
+
+	err = c.handleCommonStatusCode(res.StatusCode)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return ErrUnknownError
+	}
+
+	return nil
 }
 
 func (c *TerraregClient) DeleteNamespace(name string) error {
