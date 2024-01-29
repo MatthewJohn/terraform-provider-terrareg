@@ -46,16 +46,16 @@ func (c *TerraregClient) getTerraregApiUrl(apiEndpoint string) string {
 }
 
 func (c *TerraregClient) makeRequest(url string, requestMethod string, jsonData any) (*http.Response, error) {
-	jsonStr := "{}"
+	var body *strings.Reader = nil
 	if jsonData != nil {
 		jsonBytes, err := json.Marshal(jsonData)
 		if err != nil {
 			return nil, err
 		}
-		jsonStr = string(jsonBytes)
+		body = strings.NewReader(string(jsonBytes))
 	}
 
-	req, err := http.NewRequest(requestMethod, url, strings.NewReader(jsonStr))
+	req, err := http.NewRequest(requestMethod, url, body)
 	if err != nil {
 		return nil, err
 	}
