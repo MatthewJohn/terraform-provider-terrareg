@@ -29,8 +29,11 @@ test:
     TF_ACC: "1"
     TERRAREG_URL: "http://terrareg:5000"
     TERRAREG_API_KEY: unittest-api-key
-    NO_PROXY: "terrareg:5000,terrareg,*"
   script:
+    - unset http_proxy
+    - unset https_proxy
+    - unset HTTP_PROXY
+    - unset HTTPS_PROXY
     - go test -race $(go list ./... | grep -v /vendor/)
 
 compile:
