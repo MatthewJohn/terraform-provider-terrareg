@@ -90,7 +90,9 @@ func (c *TerraregClient) UpdateNamespace(name string, config NamespaceConfigMode
 func (c *TerraregClient) DeleteNamespace(name string) error {
 	url := c.getTerraregApiUrl(fmt.Sprintf("namespaces/%s", name))
 
-	res, err := c.makeRequest(url, "DELETE", nil)
+	// Since the namespace DELETE endpoint accepts JSON data,
+	// an empty map must be passed to ensure the request is accepted.
+	res, err := c.makeRequest(url, "DELETE", map[string]string{})
 	if err != nil {
 		return err
 	}
