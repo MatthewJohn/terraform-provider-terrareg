@@ -1,11 +1,11 @@
 package terrareg
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 type TerraregClient struct {
@@ -46,17 +46,12 @@ func (c *TerraregClient) getTerraregApiUrl(apiEndpoint string) string {
 }
 
 func (c *TerraregClient) makeRequest(url string, requestMethod string, jsonData any) (*http.Response, error) {
-	jsonStr := "{}"
+	body := new(bytes.Buffer)
 	if jsonData != nil {
-		var err error = nil
-		jsonBytes, err := json.Marshal(jsonData)
-		if err != nil {
-			return nil, err
-		}
-		jsonStr = string(jsonBytes)
+		json.NewEncoder(body).Encode(jsonData)
 	}
 
-	req, err := http.NewRequest(requestMethod, url, strings.NewReader(jsonStr))
+	req, err := http.NewRequest(requestMethod, url, body)
 	if err != nil {
 		return nil, err
 	}
