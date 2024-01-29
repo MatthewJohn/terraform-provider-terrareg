@@ -3,6 +3,10 @@ image: golang:latest
 variables:
   ADMIN_AUTHENTICATION_TOKEN: unittest-api-key
   MIGRATE_DATABASE: "True"
+  http_proxy: http://172.17.0.1:3128
+  https_proxy: http://172.17.0.1:3128
+  HTTP_PROXY: http://172.17.0.1:3128
+  HTTPS_PROXY: http://172.17.0.1:3128
 
 stages:
   - test
