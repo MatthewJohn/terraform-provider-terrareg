@@ -97,13 +97,12 @@ func (c *TerraregClient) UpdateModule(namespace string, name string, provider st
 
 	// Ignore namespace/name/provider fields if they have not been set
 	var dataToSend interface{}
-	var newId string
+	var newId string = ""
 	if config.Namespace != "" && config.Name != "" && config.Provider != "" {
 		dataToSend = config
 		newId = fmt.Sprintf("%s/%s/%s", config.Namespace, config.Name, config.Provider)
 	} else {
 		dataToSend = config.ModuleModel
-		newId = fmt.Sprintf("%s/%s/%s", namespace, name, provider)
 	}
 
 	res, err := c.makeRequest(url, "POST", dataToSend)

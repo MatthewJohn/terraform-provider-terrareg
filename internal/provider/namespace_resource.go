@@ -128,8 +128,9 @@ func (r *NamespaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	// Update attributes
-	data.ID = data.Name
-	data.DisplayName = types.StringValue(namespace.DisplayName)
+	if data.DisplayName.ValueString() != namespace.DisplayName {
+		data.DisplayName = types.StringValue(namespace.DisplayName)
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -162,8 +163,10 @@ func (r *NamespaceResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	// Update ID attribute
-	data.ID = data.Name
+	// Update ID attribute, if name has changed
+	if name != data.Name {
+		data.ID = data.Name
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -192,15 +192,25 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	// Update attributes
-	data.GitProviderID = types.Int64Value(module.GitProviderID)
-	data.RepoBaseUrlTemplate = types.StringValue(module.RepoBaseUrlTemplate)
-	data.RepoCloneUrlTemplate = types.StringValue(module.RepoCloneUrlTemplate)
-	data.RepoBrowseUrlTemplate = types.StringValue(module.RepoBrowseUrlTemplate)
-	data.GitTagFormat = types.StringValue(module.GitTagFormat)
-	data.GitPath = types.StringValue(module.GitPath)
-	// Generate ID
-	data.ID = types.StringValue(fmt.Sprintf("%s/%s/%s", data.Namespace.ValueString(), data.Name.ValueString(), data.Provider.ValueString()))
+	// Update attributes, if they've modified
+	if data.GitProviderID.ValueInt64() != module.GitProviderID {
+		data.GitProviderID = types.Int64Value(module.GitProviderID)
+	}
+	if data.RepoBaseUrlTemplate.ValueString() != module.RepoBaseUrlTemplate {
+		data.RepoBaseUrlTemplate = types.StringValue(module.RepoBaseUrlTemplate)
+	}
+	if data.RepoCloneUrlTemplate.ValueString() != module.RepoCloneUrlTemplate {
+		data.RepoCloneUrlTemplate = types.StringValue(module.RepoCloneUrlTemplate)
+	}
+	if data.RepoBrowseUrlTemplate.ValueString() != module.RepoBrowseUrlTemplate {
+		data.RepoBrowseUrlTemplate = types.StringValue(module.RepoBrowseUrlTemplate)
+	}
+	if data.GitTagFormat.ValueString() != module.GitTagFormat {
+		data.GitTagFormat = types.StringValue(module.GitTagFormat)
+	}
+	if data.GitPath.ValueString() != module.GitPath {
+		data.GitPath = types.StringValue(module.GitPath)
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -227,9 +237,6 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 	diags = req.State.GetAttribute(ctx, path.Root("provider_name"), &provider)
 	resp.Diagnostics.Append(diags...)
 
-	// Initally set ID to original name, in case update fails
-	data.ID = types.StringValue(fmt.Sprintf("%s/%s/%s", namespace.ValueString(), name.ValueString(), provider.ValueString()))
-
 	// Only provide namespace, name and provider, if one of the attributes
 	// has been changed
 	var newNamespace string
@@ -241,7 +248,7 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 		newProvider = data.Provider.ValueString()
 	}
 
-	id, err := r.client.UpdateModule(
+	newId, err := r.client.UpdateModule(
 		namespace.ValueString(),
 		name.ValueString(),
 		provider.ValueString(),
@@ -265,7 +272,9 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	// Update ID attribute
-	data.ID = types.StringValue(id)
+	if newId != "" {
+		data.ID = types.StringValue(newId)
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
