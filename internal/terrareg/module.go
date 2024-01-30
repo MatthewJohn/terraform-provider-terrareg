@@ -97,10 +97,13 @@ func (c *TerraregClient) UpdateModule(namespace string, name string, provider st
 
 	// Ignore namespace/name/provider fields if they have not been set
 	var dataToSend interface{}
+	var newId string
 	if config.Namespace != "" && config.Name != "" && config.Provider != "" {
 		dataToSend = config
+		newId = fmt.Sprintf("%s/%s/%s", config.Namespace, config.Name, config.Provider)
 	} else {
 		dataToSend = config.ModuleModel
+		newId = fmt.Sprintf("%s/%s/%s", namespace, name, provider)
 	}
 
 	res, err := c.makeRequest(url, "POST", dataToSend)
@@ -118,7 +121,7 @@ func (c *TerraregClient) UpdateModule(namespace string, name string, provider st
 
 	// Terrareg doesn't provide an 'ID' response, at the moment,
 	// so make one up on the fly
-	return fmt.Sprintf("%s/%s/%s", config.Namespace, config.Name, config.Provider), nil
+	return newId, nil
 }
 
 func (c *TerraregClient) DeleteModule(namespace string, name string, provider string) error {
