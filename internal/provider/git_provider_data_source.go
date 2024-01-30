@@ -94,6 +94,11 @@ func (d *GitProviderDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
+	if data.Id.IsNull() && data.Name.IsNull() {
+		resp.Diagnostics.AddError("Client Error", "Either 'id' or 'name' must be provided to terrareg_git_provider data source.")
+		return
+	}
+
 	gitProviders, err := d.client.GetGitProviders()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
