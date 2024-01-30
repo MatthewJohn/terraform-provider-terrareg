@@ -28,7 +28,7 @@ type ModuleResource struct {
 
 // ModuleResourceModel describes the resource data model.
 type ModuleResourceModel struct {
-	Id                    types.String `tfsdk:"id"`
+	ID                    types.String `tfsdk:"id"`
 	Namespace             types.String `tfsdk:"namespace"`
 	Name                  types.String `tfsdk:"name"`
 	Provider              types.String `tfsdk:"provider_name"`
@@ -167,7 +167,7 @@ func (r *ModuleResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	// Set ID attribute
-	data.Id = types.StringValue(id)
+	data.ID = types.StringValue(id)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -186,7 +186,7 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 	module, err := r.client.GetModule(data.Namespace.ValueString(), data.Name.ValueString(), data.Provider.ValueString())
 	// If module was not found, set ID to empty value
 	if err == terrareg.ErrNotFound {
-		data.Id = types.StringValue("")
+		data.ID = types.StringValue("")
 	} else if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read module, got error: %s", err))
 		return
@@ -200,7 +200,7 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 	data.GitTagFormat = types.StringValue(module.GitTagFormat)
 	data.GitPath = types.StringValue(module.GitPath)
 	// Generate ID
-	data.Id = types.StringValue(fmt.Sprintf("%s/%s/%s", data.Namespace.ValueString(), data.Name.ValueString(), data.Provider.ValueString()))
+	data.ID = types.StringValue(fmt.Sprintf("%s/%s/%s", data.Namespace.ValueString(), data.Name.ValueString(), data.Provider.ValueString()))
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -262,7 +262,7 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	// Update ID attribute
-	data.Id = types.StringValue(id)
+	data.ID = types.StringValue(id)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
