@@ -227,6 +227,9 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 	diags = req.State.GetAttribute(ctx, path.Root("provider_name"), &provider)
 	resp.Diagnostics.Append(diags...)
 
+	// Initally set ID to original name, in case update fails
+	data.ID = types.StringValue(fmt.Sprintf("%s/%s/%s", namespace.ValueString(), name.ValueString(), provider.ValueString()))
+
 	// Only provide namespace, name and provider, if one of the attributes
 	// has been changed
 	var newNamespace string
