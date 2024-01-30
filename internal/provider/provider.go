@@ -108,6 +108,7 @@ func (p *TerraregProvider) Resources(ctx context.Context) []func() resource.Reso
 func (p *TerraregProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewGitProvidersDataSource,
+		NewGitProviderDataSource,
 	}
 }
 

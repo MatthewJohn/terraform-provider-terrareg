@@ -45,7 +45,7 @@ func (d *GitProvidersDataSource) Schema(ctx context.Context, req datasource.Sche
 			"git_providers": schema.ListAttribute{
 				ElementType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"id":   types.NumberType,
+						"id":   types.Int64Type,
 						"name": types.StringType,
 					},
 				},

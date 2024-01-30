@@ -6,7 +6,7 @@ import (
 )
 
 type GitProviderModel struct {
-	ID   int    `json:"id" tfsdk:"id"`
+	ID   int64  `json:"id" tfsdk:"id"`
 	Name string `json:"name" tfsdk:"name"`
 }
 
