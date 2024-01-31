@@ -174,6 +174,10 @@ func (r *ModuleResource) Create(ctx context.Context, req resource.CreateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
+func (r *ModuleResource) generateId(namespace string, name string, provider string) string {
+	return fmt.Sprintf("%s/%s/%s", namespace, name, provider)
+}
+
 func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data ModuleResourceModel
 
@@ -186,12 +190,28 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	// Ensure Namespace, Name and Provieder are known,
 	// if not (during an import), attempt to use ID
-	splitId := strings.Split(data.ID.ValueString(), "/")
-	if len(splitId) != 3 {
-		resp.Diagnostics.AddError("Client Error", "ID is an invalid format")
-		return
+	var namespace, name, provider string
+	if !data.Namespace.IsUnknown() &&
+		!data.Namespace.IsNull() &&
+		!data.Name.IsUnknown() &&
+		!data.Name.IsNull() &&
+		!data.Provider.IsUnknown() &&
+		!data.Provider.IsNull() {
+
+		namespace = data.Namespace.ValueString()
+		name = data.Name.ValueString()
+		provider = data.Provider.ValueString()
+
+		// Ensure ID is set correctly
+		data.ID = types.StringValue(r.generateId(namespace, name, provider))
+	} else {
+		splitId := strings.Split(data.ID.ValueString(), "/")
+		if len(splitId) != 3 {
+			resp.Diagnostics.AddError("Client Error", "ID is an invalid format")
+			return
+		}
+		namespace, name, provider = splitId[0], splitId[1], splitId[2]
 	}
-	namespace, name, provider := splitId[0], splitId[1], splitId[2]
 
 	module, err := r.client.GetModule(namespace, name, provider)
 	// If module was not found, set ID to empty value
