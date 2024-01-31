@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -183,7 +184,16 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	module, err := r.client.GetModule(data.Namespace.ValueString(), data.Name.ValueString(), data.Provider.ValueString())
+	// Ensure Namespace, Name and Provieder are known,
+	// if not (during an import), attempt to use ID
+	splitId := strings.Split(data.ID.ValueString(), "/")
+	if len(splitId) != 3 {
+		resp.Diagnostics.AddError("Client Error", "ID is an invalid format")
+		return
+	}
+	namespace, name, provider := splitId[0], splitId[1], splitId[2]
+
+	module, err := r.client.GetModule(namespace, name, provider)
 	// If module was not found, set ID to empty value
 	if err == terrareg.ErrNotFound {
 		data.ID = types.StringValue("")
@@ -193,6 +203,15 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	// Update attributes, if they've modified
+	if data.Namespace.ValueString() != namespace {
+		data.Namespace = types.StringValue(namespace)
+	}
+	if data.Name.ValueString() != name {
+		data.Name = types.StringValue(name)
+	}
+	if data.Provider.ValueString() != provider {
+		data.Provider = types.StringValue(provider)
+	}
 	if data.GitProviderID.ValueInt64() != module.GitProviderID {
 		data.GitProviderID = types.Int64Value(module.GitProviderID)
 	}
