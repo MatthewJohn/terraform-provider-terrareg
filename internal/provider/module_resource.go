@@ -8,8 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/matthewjohn/terraform-provider-terrareg/internal/terrareg"
 )
@@ -54,9 +52,6 @@ func (r *ModuleResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Full ID of the module",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"namespace": schema.StringAttribute{
 				Required:            true,
@@ -312,7 +307,10 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	// Update ID attribute
-	if newId != "" {
+	if newId == "" {
+		newId = r.generateId(data.Namespace.ValueString(), data.Name.ValueString(), data.Provider.ValueString())
+	}
+	if data.ID.IsUnknown() || newId != data.ID.ValueString() {
 		data.ID = types.StringValue(newId)
 	}
 
