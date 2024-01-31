@@ -36,8 +36,8 @@ func TestAccModuleResource_basic(t *testing.T) {
 			{
 				Config: buildTestProviderConfig(testAccNamespaceResourceConfig_basic_read),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("terrareg_module.example", "id", "module-basic-example-import/basic-example2/aws-new"),
-					resource.TestCheckResourceAttr("terrareg_module.example", "namespace", "module-basic-example-import"),
+					resource.TestCheckResourceAttr("terrareg_module.example", "id", "module-basic-example/basic-example2/aws-new"),
+					resource.TestCheckResourceAttr("terrareg_module.example", "namespace", "module-basic-example"),
 					resource.TestCheckResourceAttr("terrareg_module.example", "name", "basic-example2"),
 					resource.TestCheckResourceAttr("terrareg_module.example", "provider_name", "aws-new"),
 				),
@@ -56,8 +56,8 @@ func TestAccModuleResource_full(t *testing.T) {
 			{
 				Config: buildTestProviderConfig(testAccNamespaceResourceConfig_full),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("terrareg_module.example2", "id", "module-basic-example/basic-example3/aws"),
-					resource.TestCheckResourceAttr("terrareg_module.example2", "namespace", "module-basic-example"),
+					resource.TestCheckResourceAttr("terrareg_module.example2", "id", "module-basic-example2/basic-example3/aws"),
+					resource.TestCheckResourceAttr("terrareg_module.example2", "namespace", "module-basic-example2"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "name", "basic-example3"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "provider_name", "aws"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "git_tag_format", "v{version}3"),
@@ -81,8 +81,8 @@ func TestAccModuleResource_full(t *testing.T) {
 			{
 				Config: buildTestProviderConfig(testAccNamespaceResourceConfig_full_read),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("terrareg_module.example2", "id", "module-basic-example/basic-example3/aws"),
-					resource.TestCheckResourceAttr("terrareg_module.example2", "namespace", "module-basic-example"),
+					resource.TestCheckResourceAttr("terrareg_module.example2", "id", "module-basic-example2/basic-example3/aws"),
+					resource.TestCheckResourceAttr("terrareg_module.example2", "namespace", "module-basic-example2"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "name", "basic-example3"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "provider_name", "aws"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "git_tag_format", "v{version}4"),
@@ -116,7 +116,7 @@ resource "terrareg_module" "example" {
 
 const testAccNamespaceResourceConfig_basic_read = `
 resource "terrareg_namespace" "this" {
- name = "module-basic-example-import"
+ name = "module-basic-example"
 }
 data "terrareg_git_provider" "this" {
   name = "Gitlab"
