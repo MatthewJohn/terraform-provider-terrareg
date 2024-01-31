@@ -36,10 +36,10 @@ func TestAccModuleResource_basic(t *testing.T) {
 			{
 				Config: buildTestProviderConfig(testAccNamespaceResourceConfig_basic_read),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("terrareg_module.example2", "id", "module-basic-example-import/basic-example2/aws"),
-					resource.TestCheckResourceAttr("terrareg_module.example2", "namespace", "module-basic-example-import"),
-					resource.TestCheckResourceAttr("terrareg_module.example2", "name", "basic-example2"),
-					resource.TestCheckResourceAttr("terrareg_module.example2", "provider_name", "aws"),
+					resource.TestCheckResourceAttr("terrareg_module.example", "id", "module-basic-example-import/basic-example2/aws"),
+					resource.TestCheckResourceAttr("terrareg_module.example", "namespace", "module-basic-example-import"),
+					resource.TestCheckResourceAttr("terrareg_module.example", "name", "basic-example2"),
+					resource.TestCheckResourceAttr("terrareg_module.example", "provider_name", "aws"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -73,7 +73,7 @@ data "terrareg_git_provider" "this" {
   name = "Gitlab"
 }
   
-resource "terrareg_module" "example2" {
+resource "terrareg_module" "example" {
   namespace      = terrareg_namespace.this.name
   name           = "basic-example2"
   provider_name  = "aws"
