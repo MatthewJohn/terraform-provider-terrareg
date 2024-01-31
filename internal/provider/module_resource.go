@@ -15,6 +15,7 @@ import (
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ModuleResource{}
 var _ resource.ResourceWithImportState = &ModuleResource{}
+var _ resource.ResourceWithModifyPlan = &ModuleResource{}
 
 func NewModuleResource() resource.Resource {
 	return &ModuleResource{}
@@ -183,30 +184,13 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	// Ensure Namespace, Name and Provieder are known,
-	// if not (during an import), attempt to use ID
-	var namespace, name, provider string
-	if !data.Namespace.IsUnknown() &&
-		!data.Namespace.IsNull() &&
-		!data.Name.IsUnknown() &&
-		!data.Name.IsNull() &&
-		!data.Provider.IsUnknown() &&
-		!data.Provider.IsNull() {
-
-		namespace = data.Namespace.ValueString()
-		name = data.Name.ValueString()
-		provider = data.Provider.ValueString()
-
-		// Ensure ID is set correctly
-		data.ID = types.StringValue(r.generateId(namespace, name, provider))
-	} else {
-		splitId := strings.Split(data.ID.ValueString(), "/")
-		if len(splitId) != 3 {
-			resp.Diagnostics.AddError("Client Error", "ID is an invalid format")
-			return
-		}
-		namespace, name, provider = splitId[0], splitId[1], splitId[2]
+	// Use existing ID to obtain previous namespace, module and provider
+	splitId := strings.Split(data.ID.ValueString(), "/")
+	if len(splitId) != 3 {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("ID is an invalid format: %s", data.ID.ValueString()))
+		return
 	}
+	namespace, name, provider := splitId[0], splitId[1], splitId[2]
 
 	module, err := r.client.GetModule(namespace, name, provider)
 	// If module was not found, set ID to empty value
@@ -216,6 +200,10 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 	} else if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read module, got error: %s", err))
 		return
+	}
+
+	if data.Namespace.ValueString() != namespace || data.Name.ValueString() != name || data.Provider.ValueString() != provider {
+		data.ID = types.StringValue(r.generateId(namespace, name, provider))
 	}
 
 	// Update attributes, if they've modified
@@ -252,52 +240,45 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 }
 
 func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data ModuleResourceModel
-
-	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	var plan ModuleResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	var state ModuleResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Get old namespace name, name and provider
-	var namespace types.String
-	diags := req.State.GetAttribute(ctx, path.Root("namespace"), &namespace)
-	resp.Diagnostics.Append(diags...)
-	var name types.String
-	diags = req.State.GetAttribute(ctx, path.Root("name"), &name)
-	resp.Diagnostics.Append(diags...)
-	var provider types.String
-	diags = req.State.GetAttribute(ctx, path.Root("provider_name"), &provider)
-	resp.Diagnostics.Append(diags...)
 
 	// Only provide namespace, name and provider, if one of the attributes
 	// has been changed
 	var newNamespace string
 	var newName string
 	var newProvider string
-	if !data.Namespace.Equal(namespace) || !data.Name.Equal(name) || !data.Provider.Equal(provider) {
-		newNamespace = data.Namespace.ValueString()
-		newName = data.Name.ValueString()
-		newProvider = data.Provider.ValueString()
+	if state.Namespace != plan.Namespace ||
+		state.Name != plan.Name ||
+		state.Provider != plan.Provider {
+
+		newNamespace = plan.Namespace.ValueString()
+		newName = plan.Name.ValueString()
+		newProvider = plan.Provider.ValueString()
+		plan.ID = types.StringValue(r.generateId(newNamespace, newName, newProvider))
 	}
 
-	newId, err := r.client.UpdateModule(
-		namespace.ValueString(),
-		name.ValueString(),
-		provider.ValueString(),
+	_, err := r.client.UpdateModule(
+		state.Namespace.ValueString(),
+		state.Name.ValueString(),
+		state.Provider.ValueString(),
 		terrareg.ModuleUpdateModel{
 			Namespace: newNamespace,
 			Name:      newName,
 			Provider:  newProvider,
 			ModuleModel: &terrareg.ModuleModel{
-				GitProviderID:         data.GitProviderID.ValueInt64(),
-				RepoBaseUrlTemplate:   data.RepoBaseUrlTemplate.ValueString(),
-				RepoCloneUrlTemplate:  data.RepoCloneUrlTemplate.ValueString(),
-				RepoBrowseUrlTemplate: data.RepoBrowseUrlTemplate.ValueString(),
-				GitTagFormat:          data.GitTagFormat.ValueString(),
-				GitPath:               data.GitPath.ValueString(),
+				GitProviderID:         plan.GitProviderID.ValueInt64(),
+				RepoBaseUrlTemplate:   plan.RepoBaseUrlTemplate.ValueString(),
+				RepoCloneUrlTemplate:  plan.RepoCloneUrlTemplate.ValueString(),
+				RepoBrowseUrlTemplate: plan.RepoBrowseUrlTemplate.ValueString(),
+				GitTagFormat:          plan.GitTagFormat.ValueString(),
+				GitPath:               plan.GitPath.ValueString(),
 			},
 		},
 	)
@@ -306,29 +287,21 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	// Update ID attribute
-	if newId == "" {
-		newId = r.generateId(data.Namespace.ValueString(), data.Name.ValueString(), data.Provider.ValueString())
-	}
-	if data.ID.IsUnknown() || newId != data.ID.ValueString() {
-		data.ID = types.StringValue(newId)
-	}
-
 	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *ModuleResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data ModuleResourceModel
+	var state ModuleResourceModel
 
 	// Read Terraform prior state data into the model
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err := r.client.DeleteModule(data.Namespace.ValueString(), data.Name.ValueString(), data.Provider.ValueString())
+	err := r.client.DeleteModule(state.Namespace.ValueString(), state.Name.ValueString(), state.Provider.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete module, got error: %s", err))
 		return
@@ -337,4 +310,27 @@ func (r *ModuleResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 func (r *ModuleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r ModuleResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	var state ModuleResourceModel
+	err := req.State.Get(ctx, &state)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to obtain state, got error: %s", err))
+		return
+	}
+
+	var plan ModuleResourceModel
+	err = req.Plan.Get(ctx, &plan)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to obtain plan, got error: %s", err))
+		return
+	}
+
+	newId := r.generateId(plan.Namespace.ValueString(), plan.Namespace.ValueString(), plan.Provider.ValueString())
+	if !state.ID.Equal(types.StringValue(newId)) {
+		state.ID = types.StringUnknown()
+	}
+
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
