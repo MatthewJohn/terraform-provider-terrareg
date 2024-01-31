@@ -120,7 +120,8 @@ func (r *NamespaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 	namespace, err := r.client.GetNamespace(data.Name.ValueString())
 	// If namespace was not found, set Name to empty value
 	if err == terrareg.ErrNotFound {
-		data.Name = types.StringValue("")
+		resp.State.RemoveResource(ctx)
+		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read namespace, got error: %s", err))

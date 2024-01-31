@@ -196,7 +196,8 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 	module, err := r.client.GetModule(namespace, name, provider)
 	// If module was not found, set ID to empty value
 	if err == terrareg.ErrNotFound {
-		data.ID = types.StringValue("")
+		resp.State.RemoveResource(ctx)
+		return
 	} else if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read module, got error: %s", err))
 		return
