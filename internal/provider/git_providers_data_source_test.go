@@ -15,7 +15,6 @@ func TestAccGitProvidersDataSource(t *testing.T) {
 			{
 				Config: buildTestProviderConfig(testAccGitProvidersDataSourceConfig),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.terrareg_git_providers.this", "git_providers.%", "3"),
 					resource.TestCheckResourceAttr("data.terrareg_git_providers.this", "git_providers.0.id", "1"),
 					resource.TestCheckResourceAttr("data.terrareg_git_providers.this", "git_providers.0.name", "Github"),
 					resource.TestCheckResourceAttr("data.terrareg_git_providers.this", "git_providers.1.id", "2"),

@@ -208,7 +208,6 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 		namespace = data.Namespace.ValueString()
 		name = data.Name.ValueString()
 		provider = data.Provider.ValueString()
-		fmt.Printf("READ: Got namespace: %s, name: %s, provider: %s\n", namespace, name, provider)
 	}
 
 	module, err := r.client.GetModule(namespace, name, provider)
