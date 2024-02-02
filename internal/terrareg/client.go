@@ -45,6 +45,16 @@ func (c *TerraregClient) getTerraregApiUrl(apiEndpoint string) string {
 	return fmt.Sprintf("%s/v1/terrareg/%s", c.Url, apiEndpoint)
 }
 
+func (c *TerraregClient) printBody(res *http.Response) {
+	var body []byte
+	_, err := res.Body.Read(body)
+	if err != nil {
+		fmt.Printf("Failed to read body: %v", err)
+		return
+	}
+	fmt.Printf("[terrareg] Got body repsonse: %v\n", &body)
+}
+
 func (c *TerraregClient) makeRequest(url string, requestMethod string, jsonData any) (*http.Response, error) {
 	body := new(bytes.Buffer)
 	if jsonData != nil {

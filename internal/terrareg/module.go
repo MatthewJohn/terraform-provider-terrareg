@@ -32,9 +32,11 @@ func (c *TerraregClient) CreateModule(namespace string, name string, provider st
 
 	err = c.handleCommonStatusCode(res.StatusCode)
 	if err != nil {
+		c.printBody(res)
 		return "", err
 	}
 	if res.StatusCode != 200 {
+		c.printBody(res)
 		return "", ErrUnknownError
 	}
 
@@ -68,9 +70,11 @@ func (c *TerraregClient) GetModule(namespace string, name string, provider strin
 
 	err = c.handleCommonStatusCode(res.StatusCode)
 	if err != nil {
+		c.printBody(res)
 		return nil, err
 	}
 	if res.StatusCode != 200 {
+		c.printBody(res)
 		return nil, ErrUnknownError
 	}
 
@@ -112,9 +116,11 @@ func (c *TerraregClient) UpdateModule(namespace string, name string, provider st
 
 	err = c.handleCommonStatusCode(res.StatusCode)
 	if err != nil {
+		c.printBody(res)
 		return "", err
 	}
 	if res.StatusCode != 200 {
+		c.printBody(res)
 		return "", ErrUnknownError
 	}
 
