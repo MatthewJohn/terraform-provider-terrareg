@@ -17,6 +17,7 @@ import (
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ModuleResource{}
 var _ resource.ResourceWithImportState = &ModuleResource{}
+var _ resource.ResourceWithModifyPlan = &ModuleResource{}
 
 func NewModuleResource() resource.Resource {
 	return &ModuleResource{}
@@ -332,4 +333,20 @@ func (r *ModuleResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 func (r *ModuleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r ModuleResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	var plan ModuleResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	newId := r.generateId(plan.Namespace.ValueString(), plan.Name.ValueString(), plan.Provider.ValueString())
+
+	// If plan value of ID is not unknown and needs to be modified,
+	// update it.
+	if !plan.ID.IsUnknown() && plan.ID.ValueString() != newId {
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("id"), types.StringValue(newId))...)
+	}
 }
