@@ -272,9 +272,9 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 	var newNamespace string
 	var newName string
 	var newProvider string
-	if state.Namespace != plan.Namespace ||
-		state.Name != plan.Name ||
-		state.Provider != plan.Provider {
+	if !state.Namespace.Equal(plan.Namespace) ||
+		!state.Name.Equal(plan.Name) ||
+		!state.Provider.Equal(plan.Provider) {
 
 		newNamespace = plan.Namespace.ValueString()
 		newName = plan.Name.ValueString()
