@@ -220,10 +220,6 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	if data.Namespace.ValueString() != namespace || data.Name.ValueString() != name || data.Provider.ValueString() != provider {
-		data.ID = types.StringValue(r.generateId(namespace, name, provider))
-	}
-
 	// Update attributes, if they've modified
 	if data.Namespace.ValueString() != namespace {
 		data.Namespace = types.StringValue(namespace)
