@@ -337,16 +337,20 @@ func (r *ModuleResource) ImportState(ctx context.Context, req resource.ImportSta
 
 func (r ModuleResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	var plan ModuleResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.Plan.Get(ctx, &plan)
+	// If unable to obtain plan (generally during a destroy),
+	// exit early without erroring
+	if diags.HasError() {
 		return
 	}
 
-	newId := r.generateId(plan.Namespace.ValueString(), plan.Name.ValueString(), plan.Provider.ValueString())
+	if !plan.Namespace.IsNull() && !plan.Namespace.IsUnknown() && !plan.Name.IsNull() && !plan.Name.IsUnknown() && !plan.Provider.IsNull() && !plan.Provider.IsUnknown() {
+		newId := r.generateId(plan.Namespace.ValueString(), plan.Name.ValueString(), plan.Provider.ValueString())
 
-	// If plan value of ID is not unknown and needs to be modified,
-	// update it.
-	if !plan.ID.IsUnknown() && plan.ID.ValueString() != newId {
-		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("id"), types.StringValue(newId))...)
+		// If plan value of ID is not unknown and needs to be modified,
+		// update it.
+		if !plan.ID.IsUnknown() && plan.ID.ValueString() != newId {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("id"), types.StringValue(newId))...)
+		}
 	}
 }
