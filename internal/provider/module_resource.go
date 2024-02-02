@@ -299,8 +299,6 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 			},
 		},
 	)
-	fmt.Sprintf("old namespace: %s, old name: %s, old prpovider: %s\n", state.Namespace.ValueString(), state.Name.ValueString(), state.Provider.ValueString())
-	fmt.Sprintf("old namespace: %s, old name: %s, old prpovider: %s\n", plan.Namespace.ValueString(), plan.Name.ValueString(), plan.Provider.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update module, got error: %s", err))
 		return
