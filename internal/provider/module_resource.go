@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/matthewjohn/terraform-provider-terrareg/internal/terrareg"
 )
@@ -15,7 +17,6 @@ import (
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ModuleResource{}
 var _ resource.ResourceWithImportState = &ModuleResource{}
-var _ resource.ResourceWithModifyPlan = &ModuleResource{}
 
 func NewModuleResource() resource.Resource {
 	return &ModuleResource{}
@@ -53,6 +54,9 @@ func (r *ModuleResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Full ID of the module",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"namespace": schema.StringAttribute{
 				Required:            true,
@@ -184,13 +188,27 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	// Use existing ID to obtain previous namespace, module and provider
-	splitId := strings.Split(data.ID.ValueString(), "/")
-	if len(splitId) != 3 {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("ID is an invalid format: %s", data.ID.ValueString()))
-		return
+	// Use existing ID, if state is not available for namespace, name or provider
+	var namespace, name, provider string
+	if data.Namespace.IsUnknown() ||
+		data.Namespace.IsNull() ||
+		data.Name.IsUnknown() ||
+		data.Name.IsNull() ||
+		data.Provider.IsUnknown() ||
+		data.Provider.IsNull() {
+
+		splitId := strings.Split(data.ID.ValueString(), "/")
+		if len(splitId) != 3 {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("ID is an invalid format: %s", data.ID.ValueString()))
+			return
+		}
+		namespace, name, provider = splitId[0], splitId[1], splitId[2]
+	} else {
+		namespace = data.Namespace.ValueString()
+		name = data.Name.ValueString()
+		provider = data.Provider.ValueString()
+		fmt.Printf("READ: Got namespace: %s, name: %s, provider: %s\n", namespace, name, provider)
 	}
-	namespace, name, provider := splitId[0], splitId[1], splitId[2]
 
 	module, err := r.client.GetModule(namespace, name, provider)
 	// If module was not found, set ID to empty value
@@ -261,7 +279,6 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 		newNamespace = plan.Namespace.ValueString()
 		newName = plan.Name.ValueString()
 		newProvider = plan.Provider.ValueString()
-		plan.ID = types.StringValue(r.generateId(newNamespace, newName, newProvider))
 	}
 
 	_, err := r.client.UpdateModule(
@@ -282,9 +299,16 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 			},
 		},
 	)
+	fmt.Sprintf("old namespace: %s, old name: %s, old prpovider: %s\n", state.Namespace.ValueString(), state.Name.ValueString(), state.Provider.ValueString())
+	fmt.Sprintf("old namespace: %s, old name: %s, old prpovider: %s\n", plan.Namespace.ValueString(), plan.Name.ValueString(), plan.Provider.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update module, got error: %s", err))
 		return
+	}
+
+	newId := types.StringValue(r.generateId(plan.Namespace.ValueString(), plan.Name.ValueString(), plan.Provider.ValueString()))
+	if !plan.ID.Equal(newId) {
+		plan.ID = newId
 	}
 
 	// Save updated data into Terraform state
@@ -310,27 +334,4 @@ func (r *ModuleResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 func (r *ModuleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func (r ModuleResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	var state ModuleResourceModel
-	err := req.State.Get(ctx, &state)
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to obtain state, got error: %s", err))
-		return
-	}
-
-	var plan ModuleResourceModel
-	err = req.Plan.Get(ctx, &plan)
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to obtain plan, got error: %s", err))
-		return
-	}
-
-	newId := r.generateId(plan.Namespace.ValueString(), plan.Namespace.ValueString(), plan.Provider.ValueString())
-	if !state.ID.Equal(types.StringValue(newId)) {
-		state.ID = types.StringUnknown()
-	}
-
-	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
