@@ -261,7 +261,7 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 	var plan ModuleResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	var state ModuleResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
