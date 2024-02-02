@@ -1,4 +1,4 @@
-module github.com/matthewjohn/terraform-provider-terrareg
+module github.com/dockstudios/terraform-provider-terrareg
 
 go 1.20
 

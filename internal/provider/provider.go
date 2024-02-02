@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/matthewjohn/terraform-provider-terrareg/internal/terrareg"
+	"github.com/dockstudios/terraform-provider-terrareg/internal/terrareg"
 )
 
 var _ provider.Provider = &TerraregProvider{}
