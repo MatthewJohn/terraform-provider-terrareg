@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 )
 
 type TerraregClient struct {
@@ -45,14 +46,13 @@ func (c *TerraregClient) getTerraregApiUrl(apiEndpoint string) string {
 	return fmt.Sprintf("%s/v1/terrareg/%s", c.Url, apiEndpoint)
 }
 
-func (c *TerraregClient) printBody(res *http.Response) {
-	var body []byte
-	_, err := res.Body.Read(body)
+func (c *TerraregClient) printBody(resp *http.Response) {
+	respDump, err := httputil.DumpResponse(resp, true)
 	if err != nil {
-		fmt.Printf("Failed to read body: %v", err)
+		fmt.Printf("[terrareg] Failed to dump repsonse")
 		return
 	}
-	fmt.Printf("[terrareg] Got body repsonse: %v\n", &body)
+	fmt.Printf("[terrareg] Got body repsonse: %s\n", string(respDump))
 }
 
 func (c *TerraregClient) makeRequest(url string, requestMethod string, jsonData any) (*http.Response, error) {
