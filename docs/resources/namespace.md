@@ -35,3 +35,11 @@ resource "terrareg_namespace" "example" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import terrareg_namespace.example examplenamespace
+```
