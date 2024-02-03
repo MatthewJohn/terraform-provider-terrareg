@@ -72,3 +72,11 @@ NOTE: Setting this field will override the repository provider configuration.
 ### Read-Only
 
 - `id` (String) Full ID of the module
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import terrareg_module.example examplenamespace/examplemodule/exampleprovider
+```

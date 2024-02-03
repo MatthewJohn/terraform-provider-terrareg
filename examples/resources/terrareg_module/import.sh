@@ -1,0 +1,1 @@
+terraform import terrareg_module.example examplenamespace/examplemodule/exampleprovider
