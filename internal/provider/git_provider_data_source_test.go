@@ -42,7 +42,7 @@ func TestAccGitProviderDataSource_by_name(t *testing.T) {
 }
 
 func TestAccGitProviderDataSource_id_and_name(t *testing.T) {
-	errorRegex, err := regexp.Compile(".*These attributes cannot be configured together: \\[id,name\\].*")
+	errorRegex, err := regexp.Compile(`.*These attributes cannot be configured together: \[id,name\].*`)
 	if err != nil {
 		t.Error(err)
 	}
@@ -61,7 +61,7 @@ func TestAccGitProviderDataSource_id_and_name(t *testing.T) {
 }
 
 func TestAccGitProviderDataSource_no_arguments(t *testing.T) {
-	errorRegex, err := regexp.Compile(".*Either 'id' or 'name' must be provided to terrareg_git_provider data source.*")
+	errorRegex, err := regexp.Compile(`.*Either 'id' or 'name' must be provided to terrareg_git_provider data source.*`)
 	if err != nil {
 		t.Error(err)
 	}
