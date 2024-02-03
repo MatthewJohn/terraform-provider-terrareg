@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/matthewjohn/terraform-provider-terrareg/internal/terrareg"
+	"github.com/dockstudios/terraform-provider-terrareg/internal/terrareg"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.

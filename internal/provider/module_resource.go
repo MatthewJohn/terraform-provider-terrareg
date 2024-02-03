@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/matthewjohn/terraform-provider-terrareg/internal/terrareg"
+	"github.com/dockstudios/terraform-provider-terrareg/internal/terrareg"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
