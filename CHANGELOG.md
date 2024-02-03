@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/compare/v1.1.0...v1.1.1) (2024-02-03)
+
+
+### Bug Fixes
+
+* Replace github user from matthewjohn to dockstudios ([6c3436b](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/6c3436bce30e549fd323641c8cb59b6f2d0ff0f2)), closes [#6](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/issues/6)
+* Update remaining references to matthewjohn after merge to main ([0e34c6e](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/0e34c6e2f0dc5767c9b97b53d25fe14e430ae5c7))
+
 # [1.1.0](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/compare/v1.0.0...v1.1.0) (2024-02-03)
 
 
