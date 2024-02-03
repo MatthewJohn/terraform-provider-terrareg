@@ -1,5 +1,23 @@
 # Changelog
 
+# [1.1.0](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/compare/v1.0.0...v1.1.0) (2024-02-03)
+
+
+### Bug Fixes
+
+* Add validation to ensure that either name or id is passed to git_provider data source ([028ef7a](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/028ef7a74fa7b186f49688873f5a6bed69670a9b)), closes [#2](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/issues/2)
+* Avoid unknown ID values during plan ([8eff463](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/8eff46327e2cad16d3e47fdb2aecc44a02403f8c)), closes [#2](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/issues/2)
+* Correctly mark object as deleted in READ when API returns 404 ([fe5b91e](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/fe5b91eab8f8cbdc5de4bd05bfcc511c29228a65)), closes [#2](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/issues/2)
+* Only update attributes during Read if the value has actually changed, to avoid showing plan changes ([fcb74ec](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/fcb74ecdb2109aef2d2cafa2c2a61981a298cb69)), closes [#2](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/issues/2)
+* Update namespace ID only in Read operation, using ID for obtaining information from API and updating, if it differs from name ([901a360](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/901a360482123faa243ff5aed87d524c19464808))
+
+
+### Features
+
+* Add data source for git_provider. Update ID type of git provider to int64 ([b579953](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/b5799535d6cc47f2a92531c95dfe561d5453bb79)), closes [#2](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/issues/2)
+* Add module resource ([a54c3c0](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/a54c3c0298d9fd0866dba8e01b649262ddadc2dc)), closes [#2](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/issues/2)
+* Add terrareg_git_providers data source for obtaining all git providers ([a34887d](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/a34887d42cbe6dceddd9a5484ed525ceef513cf6)), closes [#2](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/issues/2)
+
 # 1.0.0 (2024-01-29)
 
 
