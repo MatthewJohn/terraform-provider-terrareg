@@ -17,7 +17,7 @@ Setup `~/.terraformrc` with the following block:
 ```
 provider_installation {
   dev_overrides {
-    "matthewjohn/terrareg" = "/home/<username>/.terraform.d/plugins/"
+    "dockstudios/terrareg" = "/home/<username>/.terraform.d/plugins/"
   }
 }
 ```
