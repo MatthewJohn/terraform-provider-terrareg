@@ -112,10 +112,16 @@ func (r *NamespaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	namespace, err := r.client.GetNamespace(data.Name.ValueString())
+	// Update ID, if it does not match
+	if data.ID.IsUnknown() || data.ID.ValueString() != data.Name.ValueString() {
+		data.ID = data.Name
+	}
+
+	namespace, err := r.client.GetNamespace(data.ID.ValueString())
 	// If namespace was not found, set Name to empty value
 	if err == terrareg.ErrNotFound {
-		data.Name = types.StringValue("")
+		resp.State.RemoveResource(ctx)
+		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read namespace, got error: %s", err))
@@ -123,8 +129,9 @@ func (r *NamespaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	// Update attributes
-	data.ID = data.Name
-	data.DisplayName = types.StringValue(namespace.DisplayName)
+	if data.DisplayName.ValueString() != namespace.DisplayName {
+		data.DisplayName = types.StringValue(namespace.DisplayName)
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -157,8 +164,9 @@ func (r *NamespaceResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	// Update ID attribute
-	data.ID = data.Name
+	if data.ID.IsUnknown() || data.ID.ValueString() != data.Name.ValueString() {
+		data.ID = data.Name
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
