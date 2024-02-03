@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/compare/v1.1.1...v1.1.2) (2024-02-03)
+
+
+### Bug Fixes
+
+* Update documentation for new resources/data-sources ([bf6631f](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/commit/bf6631f18a0781faff74124ed45db7d1c36f85f0))
+
 ## [1.1.1](https://gitlab.dockstudios.co.uk/pub/terra/terraform-provider-terrareg/compare/v1.1.0...v1.1.1) (2024-02-03)
 
 
