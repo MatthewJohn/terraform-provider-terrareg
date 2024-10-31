@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dockstudios/terraform-provider-terrareg/internal/terrareg"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/dockstudios/terraform-provider-terrareg/internal/terrareg"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -38,6 +39,7 @@ type ModuleResourceModel struct {
 	RepoBaseUrlTemplate   types.String `tfsdk:"repo_base_url_template"`
 	RepoCloneUrlTemplate  types.String `tfsdk:"repo_clone_url_template"`
 	RepoBrowseUrlTemplate types.String `tfsdk:"repo_browse_url_template"`
+	ArchiveGitPath        types.Bool   `tfsdk:"archive_git_path"`
 	GitTagFormat          types.String `tfsdk:"git_tag_format"`
 	GitPath               types.String `tfsdk:"git_path"`
 }
@@ -98,6 +100,15 @@ NOTE: Setting this field will override the repository provider configuration.`,
 									  It must include the following template values: {tag} and {path}
 									  E.g. https://github.com/{namespace}/{module}-{provider}/tree/{tag}/{path}
 									  NOTE: Setting this field will override the repository provider configuration.`,
+			},
+			"archive_git_path": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				MarkdownDescription: `This determines whether the generated archives only contain the contents of the "Module path".
+									  This is only used for providing modules from archives rather than using Git repository redirects.
+									  This can be used if the source directory contains other content that you do no wish to distribute to users.
+									  Ensure that there are no depdencies on Terraform outside of the "Module path", as this will not be available to users.`,
 			},
 			"git_tag_format": schema.StringAttribute{
 				Required: true,
@@ -161,6 +172,7 @@ func (r *ModuleResource) Create(ctx context.Context, req resource.CreateRequest,
 			RepoBrowseUrlTemplate: data.RepoBrowseUrlTemplate.ValueString(),
 			GitTagFormat:          data.GitTagFormat.ValueString(),
 			GitPath:               data.GitPath.ValueString(),
+			ArchiveGitPath:        data.ArchiveGitPath.ValueBool(),
 		},
 	)
 	if err != nil {
@@ -248,6 +260,9 @@ func (r *ModuleResource) Read(ctx context.Context, req resource.ReadRequest, res
 	if data.GitPath.ValueString() != module.GitPath {
 		data.GitPath = types.StringValue(module.GitPath)
 	}
+	if data.ArchiveGitPath.ValueBool() != module.ArchiveGitPath {
+		data.ArchiveGitPath = types.BoolValue(module.ArchiveGitPath)
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -292,6 +307,7 @@ func (r *ModuleResource) Update(ctx context.Context, req resource.UpdateRequest,
 				RepoBrowseUrlTemplate: plan.RepoBrowseUrlTemplate.ValueString(),
 				GitTagFormat:          plan.GitTagFormat.ValueString(),
 				GitPath:               plan.GitPath.ValueString(),
+				ArchiveGitPath:        plan.ArchiveGitPath.ValueBool(),
 			},
 		},
 	)

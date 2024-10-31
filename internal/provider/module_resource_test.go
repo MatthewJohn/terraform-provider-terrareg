@@ -64,6 +64,7 @@ func TestAccModuleResource_full(t *testing.T) {
 					resource.TestCheckResourceAttr("terrareg_module.example2", "repo_base_url_template", "https://somecustom-domain.com/{namespace}/{module}-{provider}"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "repo_clone_url_template", "ssh://git@some-custom-domain.com/{namespace}/{module}-{provider}.git"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "repo_browse_url_template", "https://some-custom-domain.com/{namespace}/{module}-{provider}/tree/{tag}/{path}"),
+					resource.TestCheckResourceAttr("terrareg_module.example2", "archive_git_path", "false"),
 				),
 			},
 			// ImportState testing
@@ -89,6 +90,7 @@ func TestAccModuleResource_full(t *testing.T) {
 					resource.TestCheckResourceAttr("terrareg_module.example2", "repo_base_url_template", "https://somecustom-domain2.com/{namespace}/{module}-{provider}"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "repo_clone_url_template", "ssh://git@some-custom-domain2.com/{namespace}/{module}-{provider}.git"),
 					resource.TestCheckResourceAttr("terrareg_module.example2", "repo_browse_url_template", "https://some-custom-domain2.com/{namespace}/{module}-{provider}/tree/{tag}/{path}"),
+					resource.TestCheckResourceAttr("terrareg_module.example2", "archive_git_path", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -167,8 +169,9 @@ resource "terrareg_module" "example2" {
   name           = "basic-example3"
   provider_name  = "aws"
 
-  git_provider_id = data.terrareg_git_provider.this.id
-  git_tag_format  = "v{version}4"
+  git_provider_id  = data.terrareg_git_provider.this.id
+  git_tag_format   = "v{version}4"
+  archive_git_path = true
 
   repo_base_url_template = "https://somecustom-domain2.com/{namespace}/{module}-{provider}"
   repo_clone_url_template = "ssh://git@some-custom-domain2.com/{namespace}/{module}-{provider}.git"
