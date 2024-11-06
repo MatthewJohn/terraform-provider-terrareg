@@ -10,6 +10,7 @@ type ModuleModel struct {
 	RepoBaseUrlTemplate   string `json:"repo_base_url_template"`
 	RepoCloneUrlTemplate  string `json:"repo_clone_url_template"`
 	RepoBrowseUrlTemplate string `json:"repo_browse_url_template"`
+	ArchiveGitPath        bool   `json:"archive_git_path"`
 	GitTagFormat          string `json:"git_tag_format"`
 	GitPath               string `json:"git_path"`
 }
