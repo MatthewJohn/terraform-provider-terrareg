@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -103,8 +102,6 @@ NOTE: Setting this field will override the repository provider configuration.`,
 			},
 			"archive_git_path": schema.BoolAttribute{
 				Optional: true,
-				Computed: true,
-				Default:  booldefault.StaticBool(false),
 				MarkdownDescription: `This determines whether the generated archives only contain the contents of the "Module path".
 									  This is only used for providing modules from archives rather than using Git repository redirects.
 									  This can be used if the source directory contains other content that you do no wish to distribute to users.
@@ -161,19 +158,24 @@ func (r *ModuleResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	model := terrareg.ModuleModel{
+		GitProviderID:         data.GitProviderID.ValueInt64(),
+		RepoBaseUrlTemplate:   data.RepoBaseUrlTemplate.ValueString(),
+		RepoCloneUrlTemplate:  data.RepoCloneUrlTemplate.ValueString(),
+		RepoBrowseUrlTemplate: data.RepoBrowseUrlTemplate.ValueString(),
+		GitTagFormat:          data.GitTagFormat.ValueString(),
+		GitPath:               data.GitPath.ValueString(),
+		ArchiveGitPath:        data.ArchiveGitPath.ValueBool(),
+	}
+	if !data.ArchiveGitPath.IsNull() {
+		model.ArchiveGitPath = data.ArchiveGitPath.ValueBool()
+	}
+
 	id, err := r.client.CreateModule(
 		data.Namespace.ValueString(),
 		data.Name.ValueString(),
 		data.Provider.ValueString(),
-		terrareg.ModuleModel{
-			GitProviderID:         data.GitProviderID.ValueInt64(),
-			RepoBaseUrlTemplate:   data.RepoBaseUrlTemplate.ValueString(),
-			RepoCloneUrlTemplate:  data.RepoCloneUrlTemplate.ValueString(),
-			RepoBrowseUrlTemplate: data.RepoBrowseUrlTemplate.ValueString(),
-			GitTagFormat:          data.GitTagFormat.ValueString(),
-			GitPath:               data.GitPath.ValueString(),
-			ArchiveGitPath:        data.ArchiveGitPath.ValueBool(),
-		},
+		model,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create module, got error: %s", err))
