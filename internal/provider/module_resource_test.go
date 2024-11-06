@@ -150,9 +150,11 @@ resource "terrareg_module" "example2" {
   git_provider_id = data.terrareg_git_provider.this.id
   git_tag_format  = "v{version}3"
 
-  repo_base_url_template = "https://somecustom-domain.com/{namespace}/{module}-{provider}"
-  repo_clone_url_template = "ssh://git@some-custom-domain.com/{namespace}/{module}-{provider}.git"
+  repo_base_url_template   = "https://somecustom-domain.com/{namespace}/{module}-{provider}"
+  repo_clone_url_template  = "ssh://git@some-custom-domain.com/{namespace}/{module}-{provider}.git"
   repo_browse_url_template = "https://some-custom-domain.com/{namespace}/{module}-{provider}/tree/{tag}/{path}"
+
+  archive_git_path = true
 }
 `
 
